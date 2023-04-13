@@ -1,26 +1,32 @@
 const request = require('request');
-const breed  = process.argv[2];
 
-
-request(`https://api.thecatapi.com/v1/breeds/search?q=${breed}`, (error, response, body) => {
-   
-  if (error) {
-    console.error(`Error downloading resource: error is ${error}`);
-    
-  } else if (response.statusCode !== 200) {
-    console.error(`Failed to download resource. Status code: ${response.statusCode}`);
-    
-
-  } else {
-    const data = JSON.parse(body);
-    if (data.length === 0) {
-      console.error(`Breed not found: ${breed}`);
+const fetchBreedDescription = function(breedName, callback) {
+  request(`https://api.thecatapi.com/v1/breeds/search?q=${breedName}`, (error, response, body) => {
+    const nmessage = "not found"
+    if (error) {
+      console.error(`Error downloading resource: error is ${error}`);
+      callback(error, null)
+    } else if (response.statusCode !== 200) {
+      const message = `Failed to download resource. Status code: ${response.statusCode}`;
+      console.error(`Error: ${message}`);
+      callback(message, null);      
 
     } else {
-      console.log(data[0].description);
-      console.log(typeof data);
+      const data = JSON.parse(body);
+      if (data.length === 0) {
+        console.error(`Breed not found: ${breedName}`);
+        console.error(`Error: ${message}`);
+        callback(nmessage, null);
+
+      } else {
+        //console.log(data[0].description);
+        //console.log(typeof data);
+        const desc = data[0].description;
+        callback (null, desc)
+      }
     }
-  }
-  
-});
+    
+  });
+};
+module.exports = { fetchBreedDescription };
 
